@@ -9,7 +9,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    publicPath: 'http://localhost:8083/',
+    publicPath: 'http://localhost:3003/',
     clean: true,
   },
   resolve: {
@@ -61,7 +61,7 @@ module.exports = {
     new VueLoaderPlugin(),
   ],
   devServer: {
-    port: 8083,
+    port: 3003,
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
