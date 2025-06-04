@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Button, theme, useCart } from '@microfrontend-example/shared';
+import { useNavigate } from 'react-router-dom';
 
 const CartContainer = styled.div`
   padding: ${theme.spacing.lg};
@@ -109,8 +110,19 @@ const RemoveButton = styled(Button)`
   margin-left: ${theme.spacing.md};
 `;
 
+const CheckoutButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: ${theme.spacing.lg};
+`;
+
 const ShoppingCart: React.FC = () => {
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
 
   return (
     <CartContainer>
@@ -169,6 +181,11 @@ const ShoppingCart: React.FC = () => {
               <span>Total</span>
               <span>${totalPrice.toFixed(2)}</span>
             </SummaryRow>
+            <CheckoutButtonContainer>
+              <Button $variant="primary" onClick={handleCheckout}>
+                Proceed to Checkout
+              </Button>
+            </CheckoutButtonContainer>
           </CartSummary>
         </>
       )}

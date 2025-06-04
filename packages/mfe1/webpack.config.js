@@ -51,6 +51,6 @@ module.exports = {
     }),
   ],
   output: {
-    publicPath: 'auto',
+    publicPath: 'http://localhost:3001/',
   },
 }; 

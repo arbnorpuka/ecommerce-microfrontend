@@ -23,7 +23,6 @@ class EventBus {
     const callbacks = this.events.get(event)!;
     callbacks.push(callback);
 
-    // Return unsubscribe function
     return () => {
       const callbacks = this.events.get(event);
       if (callbacks) {

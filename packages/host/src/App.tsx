@@ -2,6 +2,8 @@ import React, { Suspense } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { theme, CartProvider, useCart, NotificationProvider } from '@microfrontend-example/shared';
+import CheckoutWrapper from './components/CheckoutWrapper';
+import ProductSlider from './components/ProductSlider';
 
 // Lazy load microfrontends
 const ProductCatalog = React.lazy(() => import('mfe1/ProductCatalog'));
@@ -17,6 +19,8 @@ const AppContainer = styled.div`
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
   align-items: center;
   padding: ${theme.spacing.md} 0;
   margin-bottom: ${theme.spacing.xl};
@@ -56,13 +60,24 @@ const LoadingFallback = styled.div`
   color: ${theme.colors.secondary};
 `;
 
+const HomePageContainer = styled.div`
+  padding: ${theme.spacing.lg} 0;
+`;
+
+const WelcomeMessage = styled.div`
+  font-size: ${theme.typography.fontSize.xlarge};
+  margin-bottom: ${theme.spacing.xl};
+  color: ${theme.colors.dark};
+  text-align: center;
+`;
+
 const AppContent: React.FC = () => {
   const { totalItems } = useCart();
 
   return (
     <AppContainer>
       <Header>
-        <h1>Microfrontend Example</h1>
+        <h1>E-commerce Microfrontend</h1>
         <Nav>
           <NavLink to="/">Home</NavLink>
           <NavLink to="/products">Products</NavLink>
@@ -70,14 +85,24 @@ const AppContent: React.FC = () => {
             Cart
             {totalItems > 0 && <CartCount>{totalItems}</CartCount>}
           </NavLink>
+          <NavLink to="/checkout">Checkout</NavLink>
         </Nav>
       </Header>
 
       <Suspense fallback={<LoadingFallback>Loading...</LoadingFallback>}>
         <Routes>
-          <Route path="/" element={<div>Welcome to the Microfrontend Example!</div>} />
+          <Route 
+            path="/" 
+            element={(
+              <HomePageContainer>
+                <WelcomeMessage>Welcome to the E-commerce Microfrontend</WelcomeMessage>
+                <ProductSlider />
+              </HomePageContainer>
+            )} 
+          />
           <Route path="/products" element={<ProductCatalog />} />
           <Route path="/cart" element={<ShoppingCart />} />
+          <Route path="/checkout" element={<CheckoutWrapper />} />
         </Routes>
       </Suspense>
     </AppContainer>
