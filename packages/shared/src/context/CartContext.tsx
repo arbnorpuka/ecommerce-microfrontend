@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export interface CartItem {
   id: number;
@@ -18,10 +18,38 @@ interface CartContextType {
   totalPrice: number;
 }
 
+const CART_STORAGE_KEY = 'microfrontend-cart';
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    if (items.length === 0 && localStorage.getItem(CART_STORAGE_KEY) === '[]') {
+        window.dispatchEvent(new CustomEvent('cartStateChangedByProvider'));
+    }
+  }, [items]);
+
+  const clearCart = () => {
+    setItems([]);
+  };
+
+  useEffect(() => {
+    const handleCartClearEvent = () => {
+      clearCart();
+    };
+
+    window.addEventListener('cartClearedByCheckout', handleCartClearEvent);
+
+    return () => {
+      window.removeEventListener('cartClearedByCheckout', handleCartClearEvent);
+    };
+  }, []);
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     setItems(currentItems => {
@@ -53,10 +81,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           : item
       )
     );
-  };
-
-  const clearCart = () => {
-    setItems([]);
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);

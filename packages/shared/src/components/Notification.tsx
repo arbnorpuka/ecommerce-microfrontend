@@ -33,6 +33,7 @@ const NotificationContainer = styled.div<{ isVisible: boolean }>`
   color: ${theme.colors.white};
   border-radius: ${theme.borderRadius.medium};
   box-shadow: ${theme.shadows.medium};
+  font-family: ${theme.typography.fontFamily};
   z-index: 1000;
   animation: ${props => props.isVisible ? slideIn : slideOut} 0.3s ease-in-out forwards;
 `;

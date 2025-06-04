@@ -6,10 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "concurrently \"npm run start:host\" \"npm run start:mfe1\" \"npm run start:mfe2\"",
+    "start": "concurrently \"npm run start:host\" \"npm run start:mfe1\" \"npm run start:mfe2\" \"npm run start:mfe3\"",
     "start:host": "npm run start --workspace=@microfrontend-example/host",
     "start:mfe1": "npm run start --workspace=@microfrontend-example/mfe1",
     "start:mfe2": "npm run start --workspace=@microfrontend-example/mfe2",
+    "start:mfe3": "npm run start --workspace=@microfrontend-example/mfe3",
     "build": "npm run build --workspaces",
     "clean": "rimraf packages/*/dist"
   },

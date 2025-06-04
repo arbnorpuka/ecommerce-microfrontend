@@ -42,6 +42,7 @@ module.exports = {
       shared: {
         react: { singleton: true, requiredVersion: '^18.2.0' },
         'react-dom': { singleton: true, requiredVersion: '^18.2.0' },
+        'react-router-dom': { singleton: true, requiredVersion: '^6.22.0' },
         'styled-components': { singleton: true, requiredVersion: '^6.1.8' },
         '@microfrontend-example/shared': { singleton: true, requiredVersion: '1.0.0' },
       },
@@ -51,6 +52,6 @@ module.exports = {
     }),
   ],
   output: {
-    publicPath: 'auto',
+    publicPath: 'http://localhost:3002/',
   },
 }; 
