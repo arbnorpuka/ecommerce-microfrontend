@@ -1,38 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Button, theme, eventBus } from '@microfrontend-example/shared';
+import { Button, theme, useCart, useNotification } from '@microfrontend-example/shared';
 
 interface Product {
   id: number;
-  name: string;
+  title: string;
   price: number;
   description: string;
-  image: string;
+  images: string[];
+  category: {
+    id: number;
+    name: string;
+    image: string;
+  };
 }
-
-const sampleProducts: Product[] = [
-  {
-    id: 1,
-    name: 'Product 1',
-    price: 99.99,
-    description: 'This is a sample product description.',
-    image: 'https://via.placeholder.com/200',
-  },
-  {
-    id: 2,
-    name: 'Product 2',
-    price: 149.99,
-    description: 'Another sample product description.',
-    image: 'https://via.placeholder.com/200',
-  },
-  {
-    id: 3,
-    name: 'Product 3',
-    price: 199.99,
-    description: 'Yet another sample product description.',
-    image: 'https://via.placeholder.com/200',
-  },
-];
 
 const ProductGrid = styled.div`
   display: grid;
@@ -82,30 +63,116 @@ const ProductDescription = styled.p`
   color: ${theme.colors.secondary};
 `;
 
-const ProductCatalog: React.FC = () => {
-  const [products] = useState<Product[]>(sampleProducts);
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: ${theme.spacing.xl};
+  font-size: ${theme.typography.fontSize.large};
+  color: ${theme.colors.secondary};
+`;
 
-  const handleAddToCart = (product: Product) => {
-    eventBus.publish('ADD_TO_CART', product);
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: ${theme.spacing.xl};
+  font-size: ${theme.typography.fontSize.large};
+  color: ${theme.colors.danger};
+`;
+
+const LoadMoreContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: ${theme.spacing.lg};
+`;
+
+const ProductCatalog: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const productsPerPage = 8;
+  const maxProducts = 20;
+  const { addItem } = useCart();
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('https://api.escuelajs.co/api/v1/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setProducts(data);
+        setDisplayedProducts(data.slice(0, productsPerPage));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    const nextProducts = products.slice(0, nextPage * productsPerPage);
+    setDisplayedProducts(nextProducts);
+    setPage(nextPage);
   };
 
+  const handleAddToCart = (product: Product) => {
+    addItem({
+      id: product.id,
+      name: product.title,
+      price: product.price,
+      image: product.images[0],
+    });
+    showNotification(`${product.title} added to cart!`);
+  };
+
+  if (loading) {
+    return <LoadingMessage>Loading products...</LoadingMessage>;
+  }
+
+  if (error) {
+    return <ErrorMessage>Error: {error}</ErrorMessage>;
+  }
+
+  const canLoadMore = displayedProducts.length < Math.min(products.length, maxProducts);
+
   return (
-    <ProductGrid>
-      {products.map((product) => (
-        <ProductCard key={product.id}>
-          <ProductImage src={product.image} alt={product.name} />
-          <ProductName>{product.name}</ProductName>
-          <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
-          <ProductDescription>{product.description}</ProductDescription>
+    <>
+      <ProductGrid>
+        {displayedProducts.map((product) => (
+          <ProductCard key={product.id}>
+            <ProductImage 
+              src={product.images[0] || 'https://placehold.co/400x300?text=No+Image'} 
+              alt={product.title} 
+            />
+            <ProductName>{product.title}</ProductName>
+            <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
+            <ProductDescription>{product.description}</ProductDescription>
+            <Button
+              $variant="primary"
+              onClick={() => handleAddToCart(product)}
+            >
+              Add to Cart
+            </Button>
+          </ProductCard>
+        ))}
+      </ProductGrid>
+      {canLoadMore && (
+        <LoadMoreContainer>
           <Button
-            variant="primary"
-            onClick={() => handleAddToCart(product)}
+            $variant="secondary"
+            onClick={handleLoadMore}
           >
-            Add to Cart
+            Load More
           </Button>
-        </ProductCard>
-      ))}
-    </ProductGrid>
+        </LoadMoreContainer>
+      )}
+    </>
   );
 };
 

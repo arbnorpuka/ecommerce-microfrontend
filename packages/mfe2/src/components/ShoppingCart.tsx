@@ -1,13 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Button, theme, eventBus } from '@microfrontend-example/shared';
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
+import { Button, theme, useCart } from '@microfrontend-example/shared';
 
 const CartContainer = styled.div`
   padding: ${theme.spacing.lg};
@@ -35,6 +28,20 @@ const CartItem = styled.div`
 `;
 
 const ItemInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.md};
+  flex: 1;
+`;
+
+const ItemImage = styled.img`
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: ${theme.borderRadius.small};
+`;
+
+const ItemDetails = styled.div`
   flex: 1;
 `;
 
@@ -98,76 +105,53 @@ const EmptyCart = styled.div`
   font-size: ${theme.typography.fontSize.large};
 `;
 
+const RemoveButton = styled(Button)`
+  margin-left: ${theme.spacing.md};
+`;
+
 const ShoppingCart: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  useEffect(() => {
-    const handleAddToCart = (product: any) => {
-      setCartItems(prevItems => {
-        const existingItem = prevItems.find(item => item.id === product.id);
-        if (existingItem) {
-          return prevItems.map(item =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-        }
-        return [...prevItems, { ...product, quantity: 1 }];
-      });
-    };
-
-    const unsubscribe = eventBus.subscribe('ADD_TO_CART', handleAddToCart);
-    return () => unsubscribe();
-  }, []);
-
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item => {
-        if (item.id === id) {
-          const newQuantity = item.quantity + delta;
-          return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
-        }
-        return item;
-      }).filter(item => item.quantity > 0)
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-  };
-
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const { items, updateQuantity, removeItem, totalPrice } = useCart();
 
   return (
     <CartContainer>
       <CartTitle>Shopping Cart</CartTitle>
-      {cartItems.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyCart>Your cart is empty</EmptyCart>
       ) : (
         <>
           <CartList>
-            {cartItems.map(item => (
+            {items.map(item => (
               <CartItem key={item.id}>
                 <ItemInfo>
-                  <ItemName>{item.name}</ItemName>
-                  <ItemPrice>${item.price.toFixed(2)}</ItemPrice>
+                  <ItemImage src={item.image} alt={item.name} />
+                  <ItemDetails>
+                    <ItemName>{item.name}</ItemName>
+                    <ItemPrice>${item.price.toFixed(2)}</ItemPrice>
+                  </ItemDetails>
                 </ItemInfo>
                 <ItemQuantity>
                   <QuantityButton
-                    variant="secondary"
+                    $variant="secondary"
                     size="small"
-                    onClick={() => updateQuantity(item.id, -1)}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   >
                     -
                   </QuantityButton>
                   <QuantityText>{item.quantity}</QuantityText>
                   <QuantityButton
-                    variant="secondary"
+                    $variant="secondary"
                     size="small"
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   >
                     +
                   </QuantityButton>
+                  <RemoveButton
+                    $variant="danger"
+                    size="small"
+                    onClick={() => removeItem(item.id)}
+                  >
+                    Remove
+                  </RemoveButton>
                 </ItemQuantity>
               </CartItem>
             ))}
@@ -175,7 +159,7 @@ const ShoppingCart: React.FC = () => {
           <CartSummary>
             <SummaryRow>
               <span>Subtotal</span>
-              <span>${total.toFixed(2)}</span>
+              <span>${totalPrice.toFixed(2)}</span>
             </SummaryRow>
             <SummaryRow>
               <span>Shipping</span>
@@ -183,7 +167,7 @@ const ShoppingCart: React.FC = () => {
             </SummaryRow>
             <SummaryRow>
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>${totalPrice.toFixed(2)}</span>
             </SummaryRow>
           </CartSummary>
         </>

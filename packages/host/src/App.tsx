@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { theme } from '@microfrontend-example/shared';
+import { theme, CartProvider, useCart, NotificationProvider } from '@microfrontend-example/shared';
 
 // Lazy load microfrontends
 const ProductCatalog = React.lazy(() => import('mfe1/ProductCatalog'));
@@ -38,6 +38,15 @@ const NavLink = styled(Link)`
   }
 `;
 
+const CartCount = styled.span`
+  background-color: ${theme.colors.primary};
+  color: ${theme.colors.white};
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: ${theme.typography.fontSize.small};
+  margin-left: ${theme.spacing.xs};
+`;
+
 const LoadingFallback = styled.div`
   display: flex;
   justify-content: center;
@@ -47,7 +56,9 @@ const LoadingFallback = styled.div`
   color: ${theme.colors.secondary};
 `;
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { totalItems } = useCart();
+
   return (
     <AppContainer>
       <Header>
@@ -55,7 +66,10 @@ const App: React.FC = () => {
         <Nav>
           <NavLink to="/">Home</NavLink>
           <NavLink to="/products">Products</NavLink>
-          <NavLink to="/cart">Cart</NavLink>
+          <NavLink to="/cart">
+            Cart
+            {totalItems > 0 && <CartCount>{totalItems}</CartCount>}
+          </NavLink>
         </Nav>
       </Header>
 
@@ -67,6 +81,16 @@ const App: React.FC = () => {
         </Routes>
       </Suspense>
     </AppContainer>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <NotificationProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </NotificationProvider>
   );
 };
 
