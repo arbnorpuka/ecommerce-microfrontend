@@ -6,9 +6,9 @@ type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' 
 type ButtonSize = 'small' | 'medium' | 'large';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
+  $variant?: ButtonVariant;
   size?: ButtonSize;
-  fullWidth?: boolean;
+  $fullWidth?: boolean;
   children?: ReactNode;
 }
 
@@ -44,9 +44,9 @@ const StyledButton = styled.button<ButtonProps>`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  width: ${(props: ButtonProps) => props.fullWidth ? '100%' : 'auto'};
+  width: ${(props: ButtonProps) => props.$fullWidth ? '100%' : 'auto'};
   
-  ${(props: ButtonProps) => getVariantStyles(props.variant || 'primary')}
+  ${(props: ButtonProps) => getVariantStyles(props.$variant || 'primary')}
   ${(props: ButtonProps) => getSizeStyles(props.size || 'medium')}
 
   &:disabled {
@@ -57,16 +57,16 @@ const StyledButton = styled.button<ButtonProps>`
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = 'primary',
+  $variant = 'primary',
   size = 'medium',
-  fullWidth = false,
+  $fullWidth = false,
   ...props
 }) => {
   return (
     <StyledButton
-      variant={variant}
+      $variant={$variant}
       size={size}
-      fullWidth={fullWidth}
+      $fullWidth={$fullWidth}
       {...props}
     >
       {children}
