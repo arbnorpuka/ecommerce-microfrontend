@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { theme, CartProvider, useCart, NotificationProvider } from '@microfrontend-example/shared';
 import CheckoutWrapper from './components/CheckoutWrapper';
 import ProductSlider from './components/ProductSlider';
+import DashboardPage from './components/DashboardPage';
 
 // Lazy load microfrontends
 const ProductCatalog = React.lazy(() => import('mfe1/ProductCatalog'));
@@ -80,6 +81,7 @@ const AppContent: React.FC = () => {
         <h1>E-commerce Microfrontend</h1>
         <Nav>
           <NavLink to="/">Home</NavLink>
+          <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/products">Products</NavLink>
           <NavLink to="/cart">
             Cart
@@ -100,6 +102,7 @@ const AppContent: React.FC = () => {
               </HomePageContainer>
             )} 
           />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/products" element={<ProductCatalog />} />
           <Route path="/cart" element={<ShoppingCart />} />
           <Route path="/checkout" element={<CheckoutWrapper />} />
